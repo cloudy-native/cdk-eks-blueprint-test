@@ -1,21 +1,76 @@
-#!/usr/bin/env node
-import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
-import { EksTestStack } from '../lib/eks-test-stack';
+import {
+  AppMeshAddOn,
+  ArgoCDAddOn,
+  AwsLoadBalancerControllerAddOn,
+  ClusterAddOn,
+  ClusterAutoScalerAddOn,
+  ContainerInsightsAddOn,
+  CoreDnsAddOn,
+  DirectVpcProvider,
+  EksBlueprint,
+  FargateClusterProvider,
+  GlobalResources,
+  MetricsServerAddOn,
+} from "@aws-quickstart/eks-blueprints";
+import * as cdk from "aws-cdk-lib";
+import { Environment, Stack, StackProps } from "aws-cdk-lib";
+import { IVpc, Vpc } from "aws-cdk-lib/aws-ec2";
+import { FargateProfileOptions, KubernetesVersion } from "aws-cdk-lib/aws-eks";
+import { Construct } from "constructs";
+import "source-map-support/register";
 
 const app = new cdk.App();
-new EksTestStack(app, 'EksTestStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+const env: Environment = {
+  account: process.env.CDK_DEFAULT_ACCOUNT,
+  region: process.env.CDK_DEFAULT_REGION,
+};
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+class VpcStack extends Stack {
+  readonly vpc: IVpc;
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+  get availabilityZones(): string[] {
+    return ["us-east-1b", "us-east-1c", "us-east-1d"];
+  }
+
+  constructor(scope: Construct, id: string, props?: StackProps) {
+    super(scope, id, props);
+
+    this.vpc = new Vpc(this, "vpc", {
+      maxAzs: 2,
+    });
+  }
+}
+
+const vpcStack = new VpcStack(app, "vpc-stack", { env });
+
+const addOns: Array<ClusterAddOn> = [
+  new ArgoCDAddOn(),
+  new AppMeshAddOn(),
+  new MetricsServerAddOn(),
+  new ClusterAutoScalerAddOn(),
+  new ContainerInsightsAddOn(),
+  new AwsLoadBalancerControllerAddOn(),
+  // new VpcCniAddOn(),
+  new CoreDnsAddOn(),
+  // new KubeProxyAddOn(),
+  // new XrayAddOn(),
+];
+
+const fargateProfiles: Map<string, FargateProfileOptions> = new Map([
+  ["custom", { selectors: [{ namespace: "default" }] }],
+]);
+
+const fargateClusterProvider = new FargateClusterProvider({
+  fargateProfiles,
+  version: KubernetesVersion.V1_22,
+  vpc: vpcStack.vpc,
 });
+
+const vpcResourceProvider = EksBlueprint.builder()
+  .account(process.env.CDK_DEFAULT_ACCOUNT)
+  .region(process.env.CDK_DEFAULT_REGION)
+  .addOns(...addOns)
+  // .clusterProvider(fargateClusterProvider)
+  .resourceProvider(GlobalResources.Vpc, new DirectVpcProvider(vpcStack.vpc))
+  .build(app, "eks-blueprint");
