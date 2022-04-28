@@ -1,9 +1,11 @@
 import {
   AppMeshAddOn,
   ArgoCDAddOn,
+  AwsForFluentBitAddOn,
   AwsLoadBalancerControllerAddOn,
   ClusterAddOn,
   ClusterAutoScalerAddOn,
+  CodePipelineStack,
   ContainerInsightsAddOn,
   CoreDnsAddOn,
   DirectVpcProvider,
@@ -12,14 +14,16 @@ import {
   GlobalResources,
   MetricsServerAddOn,
 } from "@aws-quickstart/eks-blueprints";
-import * as cdk from "aws-cdk-lib";
-import { Environment, Stack, StackProps } from "aws-cdk-lib";
+import { DatadogAddOn } from "@datadog/datadog-eks-blueprints-addon";
+import { KubecostAddOn } from "@kubecost/kubecost-eks-blueprints-addon";
+import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
 import { IVpc, Vpc } from "aws-cdk-lib/aws-ec2";
 import { FargateProfileOptions, KubernetesVersion } from "aws-cdk-lib/aws-eks";
 import { Construct } from "constructs";
 import "source-map-support/register";
+import { TeamSRE, TeamViewOnly } from "../lib";
 
-const app = new cdk.App();
+const app = new App();
 
 const env: Environment = {
   account: process.env.CDK_DEFAULT_ACCOUNT,
@@ -46,7 +50,17 @@ const vpcStack = new VpcStack(app, "vpc-stack", { env });
 
 const addOns: Array<ClusterAddOn> = [
   new ArgoCDAddOn(),
-  new AppMeshAddOn(),
+  new AppMeshAddOn({
+    enableTracing: true,
+    tracingProvider: "x-ray",
+  }),
+  new DatadogAddOn({
+    apiKeyExistingSecret: "datadog-secret",
+  }),
+  new AwsForFluentBitAddOn({
+    iamPolicies: [],
+    values: {},
+  }),
   new MetricsServerAddOn(),
   new ClusterAutoScalerAddOn(),
   new ContainerInsightsAddOn(),
@@ -55,6 +69,7 @@ const addOns: Array<ClusterAddOn> = [
   new CoreDnsAddOn(),
   // new KubeProxyAddOn(),
   // new XrayAddOn(),
+  new KubecostAddOn(),
 ];
 
 const fargateProfiles: Map<string, FargateProfileOptions> = new Map([
@@ -67,10 +82,26 @@ const fargateClusterProvider = new FargateClusterProvider({
   vpc: vpcStack.vpc,
 });
 
-const vpcResourceProvider = EksBlueprint.builder()
-  .account(process.env.CDK_DEFAULT_ACCOUNT)
-  .region(process.env.CDK_DEFAULT_REGION)
+const sreTeam = new TeamSRE(app);
+const viewOnlyTeam = new TeamViewOnly(app);
+
+const blueprint = EksBlueprint.builder()
+  .account(env.account)
+  .region(env.region)
   .addOns(...addOns)
+  .teams(sreTeam, viewOnlyTeam)
   // .clusterProvider(fargateClusterProvider)
-  .resourceProvider(GlobalResources.Vpc, new DirectVpcProvider(vpcStack.vpc))
-  .build(app, "eks-blueprint");
+  .resourceProvider(GlobalResources.Vpc, new DirectVpcProvider(vpcStack.vpc));
+
+// TBD
+//
+CodePipelineStack.builder()
+  .name("eks-blueprints-pipeline")
+  .owner("aws-samples")
+  .repository({
+    repoUrl: "cdk-eks-blueprints-patterns",
+    credentialsSecretName: "github-token",
+    targetRevision: "main",
+  });
+
+const eksStack = blueprint.build(app, "eks-blueprint");

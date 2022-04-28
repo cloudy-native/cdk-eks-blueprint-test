@@ -10,7 +10,7 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aws-quickstart/eks-blueprints@^1.0.0":
+"@aws-quickstart/eks-blueprints@^1.0.0", "@aws-quickstart/eks-blueprints@latest":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@aws-quickstart/eks-blueprints/-/eks-blueprints-1.0.0.tgz#2a478bb35af46a0ab2011455893a02a4fdd83d13"
   integrity sha512-XYD5WJMDPxqLbp28yKT0vT9duV3UKRNcz3gsPJYgf6F5PdNsuxu5vB1LFvTdhTYmwIXj/7Kvlo2pgxWfXBJD4g==
@@ -310,6 +310,16 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@datadog/datadog-eks-blueprints-addon@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@datadog/datadog-eks-blueprints-addon/-/datadog-eks-blueprints-addon-0.1.2.tgz#a2959899cb7aa0ae0b303300e61bbe076f0c2e4d"
+  integrity sha512-jynEYxkxChiNLljFYS7x9C0j9sVFz40X1XkCXyz3zscNaHI5ZHwncDikRBkfN8C0y+AaI3MyL2EdlMgf/sQdsg==
+  dependencies:
+    "@aws-quickstart/eks-blueprints" latest
+    aws-cdk "^2.20.0"
+    constructs "^10.0.0"
+    source-map-support "^0.5.16"
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.1.0.tgz#fd3db1d59ecf7cf121e80650bb86712f9b55eced"
@@ -527,6 +537,15 @@
   dependencies:
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
+
+"@kubecost/kubecost-eks-blueprints-addon@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@kubecost/kubecost-eks-blueprints-addon/-/kubecost-eks-blueprints-addon-0.1.2.tgz#a34109704ff7921e4db197c4186725e376808bcb"
+  integrity sha512-FzFmEItCnTjhYVB5UGx0cj+5YIM9Eelfy5BiSh5/8Jbvj5+otkDBG8Ka7eYYcNkgi/HcAifBP/NYreyIm/BmWw==
+  dependencies:
+    "@aws-quickstart/eks-blueprints" latest
+    aws-cdk "2.17.0"
+    constructs "^10.0.112"
 
 "@mapbox/node-pre-gyp@^1.0.0":
   version "1.0.9"
@@ -890,6 +909,20 @@ aws-cdk-lib@2.20.0:
     punycode "^2.1.1"
     semver "^7.3.5"
     yaml "1.10.2"
+
+aws-cdk@2.17.0:
+  version "2.17.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.17.0.tgz#cb9149c55f1bec54eacfe0242d3454faf4292e2e"
+  integrity sha512-gRPPpTONOjtQ40A8sc2SzXPGDzFlVbSPPts1pjOx4VBJ2S91A0ON3Fkby+XX/Xqdo1GITTWAk5Va4PnoYyUhmA==
+  optionalDependencies:
+    fsevents "2.3.2"
+
+aws-cdk@^2.20.0:
+  version "2.22.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.22.0.tgz#3d0a3158f228f398faed49d73372f8aa351034bf"
+  integrity sha512-oF3VCv/rtuLk8eLb6CBEWvEobabG8q05ersawGEy9CBhKbKNjfY1FDz6gc3ssksTwfcJqyJms2l/BQlLMBjugw==
+  optionalDependencies:
+    fsevents "2.3.2"
 
 aws-sdk@2.1069.0:
   version "2.1069.0"
@@ -1273,7 +1306,7 @@ console-control-strings@^1.0.0, console-control-strings@^1.1.0:
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
   integrity sha1-PXz0Rk22RG6mRL9LOVB/mFEAjo4=
 
-constructs@^10.0.0:
+constructs@^10.0.0, constructs@^10.0.112:
   version "10.0.127"
   resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.0.127.tgz#b158a5776aca74613d9120a77afb555091179afd"
   integrity sha512-g/jXdannzQ2HiDq9K+Wu/szBuIDgehMTPKIHHWnIJsdFinGOjHohyAnZXlkR2h5bhLE9BCekWWN692FiCwCraA==
@@ -1714,7 +1747,7 @@ fs.realpath@^1.0.0:
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
 
-fsevents@^2.1.2:
+fsevents@2.3.2, fsevents@^2.1.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
   integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
